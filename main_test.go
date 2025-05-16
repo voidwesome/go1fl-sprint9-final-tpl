@@ -2,51 +2,56 @@ package main
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // TestGenerateRandomElements проверяет правильность работы функции generateRandomElements.
 func TestGenerateRandomElements(t *testing.T) {
-	// Проверяем случай, когда размер среза равен нулю
-	t.Run("ZeroSize", func(t *testing.T) {
-		result := generateRandomElements(0)
-		if len(result) != 0 {
-			t.Fatalf("Expected empty slice, got %d elements", len(result))
-		}
-	})
+	tests := []struct {
+		name     string
+		size     int
+		expected int
+	}{
+		{"ZeroSize", 0, 0},
+		{"NegativeSize", -10, 0},
+		{"SmallSize", 5, 5},
+		{"LargeSize", 1000, 1000},
+	}
 
-	// Проверяем случай, когда размер среза положительный
-	t.Run("PositiveSize", func(t *testing.T) {
-		result := generateRandomElements(100)
-		if len(result) != 100 {
-			t.Fatalf("Expected 100 elements, got %d", len(result))
-		}
-	})
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			slice := generateRandomElements(tt.size)
+			require.NotNil(t, slice)
+			assert.Equal(t, tt.expected, len(slice))
+			for _, v := range slice {
+				assert.Greater(t, v, 0)
+			}
+		})
+	}
 }
 
 // TestMaximum проверяет правильность работы функции maximum с различными входными данными.
 func TestMaximum(t *testing.T) {
-	// Тестируем срез с нулевым размером
-	t.Run("EmptySlice", func(t *testing.T) {
-		result := maximum([]int{})
-		if result != 0 {
-			t.Fatalf("Expected 0 for empty slice, got %d", result)
-		}
-	})
+	tests := []struct {
+		name     string
+		input    []int
+		expected int
+	}{
+		{"NilSlice", nil, 0},
+		{"EmptySlice", []int{}, 0},
+		{"OneElement", []int{99}, 99},
+		{"Ascending", []int{10, 20, 30, 40, 50}, 50},
+		{"Descending", []int{70, 60, 50, 40, 30}, 70},
+		{"Unordered", []int{17, 3, 88, 42, 12}, 88},
+		{"AllEqual", []int{111, 111, 111}, 111},
+	}
 
-	// Тестируем срез, содержащий один элемент
-	t.Run("SingleElement", func(t *testing.T) {
-		result := maximum([]int{42})
-		if result != 42 {
-			t.Fatalf("Expected 42, got %d", result)
-		}
-	})
-
-	// Тестируем срез с несколькими элементами
-	t.Run("MultipleElements", func(t *testing.T) {
-		data := []int{1, 3, 5, 2, 9, 7}
-		result := maximum(data)
-		if result != 9 {
-			t.Fatalf("Expected 9, got %d", result)
-		}
-	})
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := maximum(tt.input)
+			assert.Equal(t, tt.expected, result)
+		})
+	}
 }

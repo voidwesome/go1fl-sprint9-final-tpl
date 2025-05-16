@@ -8,19 +8,18 @@ import (
 )
 
 const (
-	SIZE   = 10_000_000
+	SIZE   = 100_000_000
 	CHUNKS = 8
 )
 
-// generateRandomElements generates random elements.
+// generateRandomElements генерирует слайс случайных положительных чисел.
 func generateRandomElements(size int) []int {
 	if size <= 0 {
 		return []int{}
 	}
-	rand.Seed(time.Now().UnixNano())
 	data := make([]int, size)
 	for i := range data {
-		data[i] = rand.Intn(1_000_000) + 1 // положительные числа
+		data[i] = rand.Int() + 1
 	}
 	return data
 }
@@ -51,17 +50,17 @@ func maxChunks(data []int) int {
 	wg.Add(CHUNKS)
 
 	for i := 0; i < CHUNKS; i++ {
-		go func(i int) {
+		start := i * chunkSize
+		end := start + chunkSize
+		if i == CHUNKS-1 {
+			end = len(data)
+		}
+		chunk := data[start:end]
+
+		go func(index int, sub []int) {
 			defer wg.Done()
-			start := i * chunkSize
-			end := start + chunkSize
-			// для последнего чанка обрабатываем остаток
-			if i == CHUNKS-1 {
-				end = len(data)
-			}
-			max := maximum(data[start:end])
-			maximums[i] = max
-		}(i)
+			maximums[index] = maximum(sub)
+		}(i, chunk)
 	}
 
 	wg.Wait()
